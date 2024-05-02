@@ -180,7 +180,7 @@ class GUI_Teacher{
         //frame.setVisible(true);
     }
 
-
+    /** The following parts are definition of the methods */
 
     // file writer, called by action listener of the "download" button
     private void file_writer(){
@@ -229,7 +229,7 @@ class GUI_Teacher{
 
 
     /* because of the format of the answers are always the same, \t will be the token of
-        splitting the answer and name */
+        splitting the answer and the name */
     private int splitterFinder(String answer){
         int i;
         for(i = 0; i < answer.length(); i++){
@@ -250,7 +250,6 @@ class GUI_Teacher{
     private synchronized void safeUploader(String name, String id, String ans, String db){
         String toExe = "INSERT INTO "+db+"(student, question_id, answer) VALUES ("+ augString(name) + "," +
                 augString(id) + "," + augString(ans) + ");";
-        // System.out.println(toExe);
 
         try {
             statement.execute(toExe);
@@ -259,6 +258,8 @@ class GUI_Teacher{
         }
 
     }
+
+    /** The following parts are definition of inner classes */
 
     // A thread to send the question and answer to the clients
     private class ServerStarter extends Thread{
@@ -473,20 +474,20 @@ class GUI_Teacher{
 
     // this is the gui for setting a question
     private class QuestionGUI{
-        private final JFrame frame;
-        private final JPanel background;
-        private final JTextArea question;
-        private JScrollPane qPane;
-        private final JTextArea choiceA;
-        private JScrollPane aPane;
-        private final JTextArea choiceB;
-        private JScrollPane bPane;
-        private final JTextArea choiceC;
+        private final JFrame frame;                 // the main frame
+        private final JPanel background;            // the background panel
+        private final JTextArea question;           // the input area for the question description
+        private JScrollPane qPane;                  // allow multiple lines
+        private final JTextArea choiceA;            // the input area for the choice A
+        private JScrollPane aPane;                  // allow multiple lines
+        private final JTextArea choiceB;            // the input area for the choice B
+        private JScrollPane bPane;                  // allow multiple lines
+        private final JTextArea choiceC;            // same for C
         private JScrollPane cPane;
-        private final JTextArea choiceD;
+        private final JTextArea choiceD;            // same for D
         private JScrollPane dPane;
-        private final JTextField qID;
-        private final JButton done;
+        private final JTextField qID;               // the input field for qid
+        private final JButton done;                 // the confirmation button
 
 
         public QuestionGUI(){
@@ -586,16 +587,16 @@ class GUI_Teacher{
 
     // This is the gui for set/change db
     private class DBConnectGUI{
-        private JFrame DBFrame;
-        private JLabel addr;
-        private JTextArea addrField;
-        private JButton connectB;
-        private JTextField dField;
-        private JLabel dbNameLabel;
-        private JLabel pass;
-        private JPasswordField passField;
-        private JLabel uname;
-        private JTextField usrField;
+        private JFrame DBFrame;             // main frame
+        private JLabel addr;                // label for the address field
+        private JTextArea addrField;        // the input field for address of the db
+        private JButton connectB;           // the button of "connect"
+        private JTextField dField;          // the input field for the table name
+        private JLabel dbNameLabel;         // the label for the table name
+        private JLabel pass;                // the label for the password
+        private JPasswordField passField;   // the input field for the password
+        private JLabel uname;               // the label for the username
+        private JTextField usrField;        // the input field of the username
 
         // initialize the gui
         public DBConnectGUI() {
@@ -614,7 +615,7 @@ class GUI_Teacher{
             DBFrame.setSize(463,300);
             DBFrame.setResizable(false);
 
-            dbNameLabel.setText("Database:");
+            dbNameLabel.setText("Table name:");
 
             addr.setText("Address:");
 

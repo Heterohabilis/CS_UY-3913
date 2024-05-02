@@ -41,9 +41,9 @@ class Client{
 
     // the class of the connect gui
     private class ConnectGui{
-        private JFrame connectFrame;
-        private JTextField ipField;
-        private JButton connectButton;
+        private JFrame connectFrame;        // the main frame
+        private JTextField ipField;         // the place to input ip
+        private JButton connectButton;      // the button for confirmation
         public ConnectGui(){
             init();                             // initialize the gui
             ActionListener ac = new ActionListener(){
@@ -129,12 +129,12 @@ class Client{
         private void connect(String ip, int port){
             try {
                 socket = new Socket();
-                socket.connect(new InetSocketAddress(ip, port), 5000);
+                socket.connect(new InetSocketAddress(ip, port), 5000);  // if cannot connect in 5s, then timeout
                 cout = new PrintStream(socket.getOutputStream());
                 cin = new Scanner(socket.getInputStream());
                 isConnected = true;         // if success, change the flag
             } catch (IOException e) {
-                notifyGUI.init("Wrong IP or port!", "Error");
+                notifyGUI.init("Wrong IP address! ", "Error");
                 // throw new RuntimeException(e);
             }
         }
@@ -142,17 +142,17 @@ class Client{
 
     // similar to the warningGUI of teacher end
     private class NotifyGUI{
-        private JFrame frame;
-        private JLabel warning;
+        private JFrame frame;       // the main frame
+        private JLabel info;        // the information
         NotifyGUI(){
             frame = new JFrame("error");
             frame.setSize(500,300);
-            warning = new JLabel("", JLabel.CENTER);
-            frame.add(warning);
+            info = new JLabel("", JLabel.CENTER);
+            frame.add(info);
             frame.setResizable(false);
         }
         public void init(String content, String tittle){
-            this.warning.setText(content);
+            this.info.setText(content);
             frame.setTitle(tittle);
             frame.setVisible(true);
         }
@@ -268,6 +268,7 @@ class Client{
 
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
+                    // a buffer for the to-be-sent answer
                     String msg2Send="";
 
                     // check choice
@@ -307,7 +308,8 @@ class Client{
                 }
             };
             submit.addActionListener(ac);
-            fillQuestion();                 // fill the question area and the choices
+            fillQuestion();                 // fill the current question
+            // rendering the texts to the gui
             buttonA.setText(q.answerA);
             buttonB.setText(q.answerB);
             buttonC.setText(q.answerC);
@@ -316,7 +318,7 @@ class Client{
             qaframe.setVisible(true);
         }
 
-        // ths method will listen to the teacher's end and pass the question and choices to the question area and choices
+        // ths method will listen to the teacher's end, receive the questions and options, and set it to the question now
         private void fillQuestion(){
             String QAndA="";
             while(cin.hasNextLine()){
@@ -325,7 +327,7 @@ class Client{
             }
 
             // find the marker of different part of the question, find substring, and set value
-            int QStart=QAndA.indexOf(";:Q:");
+            int QStart=QAndA.indexOf(";:Q:");   // use some special splitting char combinations ";:"
             int AStart=QAndA.indexOf(";:A.");
             int BStart=QAndA.indexOf(";:B.");
             int CStart=QAndA.indexOf(";:C.");
@@ -345,7 +347,7 @@ class Client{
             try {
                 socket.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                notifyGUI.init("Something Wrong!", "Error");
             }
         }
     }
