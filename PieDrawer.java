@@ -1,3 +1,5 @@
+package final_prj;
+
 import javax.swing.*;
 import java.awt.*;
 

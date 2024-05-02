@@ -1,3 +1,5 @@
+package final_prj;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,6 +8,19 @@ import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
+
+/**
+ * There are three guis in student's end: connection gui, q&a gui, and a notification gui.
+ * In connection gui, students must fill the IP provided by the teacher.
+ * Then, the scanner will obtain the question and choices from the teacher's end and render them on the q&A gui.
+ * Students must select an option AND fill their name, or they cannot submit.
+ * Each time running the program, the students are allowed to answer the question once.
+ * After answering the question, the student's end will [TRY] to upload the answer to the teacher's end.
+ * If the teacher stops the server before the student gives an answer, after submitting, the teacher will not get the
+ * answer.
+ * (NO LATE SUBMISSION!)
+ */
+
 
 
 // the class of the client
@@ -28,7 +43,6 @@ class Client{
     private class ConnectGui{
         private JFrame connectFrame;
         private JTextField ipField;
-        private JTextField portField;
         private JButton connectButton;
         public ConnectGui(){
             init();                             // initialize the gui
@@ -38,13 +52,7 @@ class Client{
                 public void actionPerformed(ActionEvent actionEvent) {
                     // fetch the information passed by the student
                     String ip = ipField.getText();
-                    int port;
-                    try {
-                        port = Integer.parseInt(portField.getText());
-                    }catch(NumberFormatException e){
-                        notifyGUI.init("Bad input!", "Error");
-                        return;
-                    }
+                    int port = 1919;  // constant port
 
                     // call the connect function, which will change the flag
                     connect(ip, port);
@@ -62,10 +70,8 @@ class Client{
 
         private void init(){
             connectButton = new JButton();
-            JLabel portL = new JLabel();
             JLabel ipL = new JLabel();
             ipField = new JTextField();
-            portField = new JTextField();
             connectFrame = new JFrame("Login");
             connectFrame.setResizable(false);
 
@@ -73,8 +79,6 @@ class Client{
             connectFrame.setSize(459, 300);
 
             connectButton.setText("Login");
-
-            portL.setText("Port:");
 
             ipL.setText("IP:");
             
@@ -90,9 +94,7 @@ class Client{
                                                     .addComponent(connectButton, GroupLayout.PREFERRED_SIZE, 81, GroupLayout.PREFERRED_SIZE))
                                             .addGroup(layout.createSequentialGroup()
                                                     .addGap(64, 64, 64)
-                                                    .addComponent(portL, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-                                                    .addGap(31, 31, 31)
-                                                    .addComponent(portField, GroupLayout.PREFERRED_SIZE, 273, GroupLayout.PREFERRED_SIZE)))
+                                                    .addGap(31, 31, 31)))
                                     .addContainerGap(45, Short.MAX_VALUE))
                             .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                     .addGap(0, 0, Short.MAX_VALUE)
@@ -110,9 +112,7 @@ class Client{
                                     .addGap(72, 72, 72)
                                     .addComponent(ipField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
-                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                            .addComponent(portL)
-                                            .addComponent(portField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE))
                                     .addGap(44, 44, 44)
                                     .addComponent(connectButton, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
                                     .addGap(36, 36, 36))
@@ -147,8 +147,9 @@ class Client{
         NotifyGUI(){
             frame = new JFrame("error");
             frame.setSize(500,300);
-            warning = new JLabel("");
+            warning = new JLabel("", JLabel.CENTER);
             frame.add(warning);
+            frame.setResizable(false);
         }
         public void init(String content, String tittle){
             this.warning.setText(content);
@@ -282,6 +283,10 @@ class Client{
                     else if(buttonD.isSelected()){
                         msg2Send = "D";
                     }
+                    else{
+                        notifyGUI.init("Select an option!", "Error");
+                        return;
+                    }
 
                     // student must fill their name
                     if(nameField.getText().isEmpty()){
@@ -351,6 +356,5 @@ class Client{
     public class Student {
     public static void main(String[] args) {
         Client s = new Client();
-
     }
 }

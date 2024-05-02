@@ -1,9 +1,9 @@
+package final_prj;
+
 import org.mariadb.jdbc.Connection;
 import org.mariadb.jdbc.Statement;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,6 +16,20 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+    This is the code for teacher's end. It has four guis: database setting gui, main gui, question setting gui, and a
+    warning gui. After the software is started, the database setting gui will appear. The teacher can choose to fill the
+    fields to set the database to where the result will be uploaded. If leaving it blank or failing to connect, then the
+    teacher will still be able to use the software, but the result will not be uploaded. Then, in the main gui, the teacher
+    will need to set the question first. In the question setting gui, the teacher should fill all fields: question, A, B,
+    C, D, and the question ID. After that, the teacher may start the server. The server will be started at [IP]:1919. Af
+    -ter students' end are connected, teacher's end will send the question via the output stream to student's end, and that
+    end will handle the sent information and show it in correct format. A scanner will be ready to hear from student's end.
+    The heard results will be recorded in a thread-safe list by each message listener thread. The teacher can check the
+    pie chart by connecting the "view result" button. Teachers may not edit the question or download the result in txt file
+    unless they stop the connection.
+*/
+
 
 // Structure of the Question
 class Question{
@@ -25,6 +39,9 @@ class Question{
     String answerC;
     String answerD;
     String ID;          // The unique ID of the question
+
+    /* Test: jdbc:mariadb://localhost:3306/polls, RECORDS */
+
     // check if the class has been initiated
     private boolean isInit(){
         return question!=null && answerA!=null && answerD!=null && answerC!=null && answerB!=null;
@@ -76,7 +93,7 @@ class GUI_Teacher{
     /* Flags Area */
     private boolean isQSet;         // is the question set?
     private boolean isConnected;    // is the server open?
-    private boolean isBSet;         // is the database set?
+    private boolean isDBSet;         // is the database set?
 
 
     // constructor for the class
@@ -178,7 +195,7 @@ class GUI_Teacher{
         }
 
         // filename format: mm-dd-yyyy h-min-sec_qID
-        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy HH-mm-ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         Date date = new Date();
         String dir = System.getProperty("user.dir");  // get the current dir.
         String time = formatter.format(date);
@@ -193,11 +210,11 @@ class GUI_Teacher{
             writer.write("B: "+now_q.answerB+"\n");
             writer.write("C: "+now_q.answerC+"\n");
             writer.write("D: "+now_q.answerD+"\n");
-            writer.write("There are "+answers.size()+" students answered the question.\n");
-            writer.write(frac_ans[0]+" student chose A\n");
-            writer.write(frac_ans[1]+" student chose B\n");
-            writer.write(frac_ans[2]+" student chose C\n");
-            writer.write(frac_ans[3]+" student chose D\n");
+            writer.write("There are "+answers.size()+" student(s) answered the question.\n");
+            writer.write(frac_ans[0]+" student(s) chose A\n");
+            writer.write(frac_ans[1]+" student(s) chose B\n");
+            writer.write(frac_ans[2]+" student(s) chose C\n");
+            writer.write(frac_ans[3]+" student(s) chose D\n");
             writer.write("-------------------------------------------------------------\n\n");
             writer.write("Option | name\n");
             for (String str : answers) {
@@ -250,6 +267,7 @@ class GUI_Teacher{
                 serverSocket = new ServerSocket(1919);      // set the port
             } catch (IOException e) {
                 warningGUI.init("Unable to start server...try again later") ;
+                return;
             }
             while (isConnected){
                 // main loop
@@ -299,14 +317,14 @@ class GUI_Teacher{
                     String name = localAns.substring(indexOfSplitter+1);
 
                     // if the database is available, upload the result
-                    if(isBSet)
+                    if(isDBSet)
                         safeUploader(name, now_q.ID, ans, dbName);
 
                     // close it immediately
                     try {
                         s.close();
                     } catch (IOException e) {
-                        warningGUI.init("Failed to close the socket~");
+                        warningGUI.init("Failed to close the socket!");
                     }
                     break;
                 }
@@ -365,11 +383,12 @@ class GUI_Teacher{
                 return;
             }
             if(!isConnected){
-                warningGUI.init("not connected!");
+                warningGUI.init("Not connected!");
+
             }
 
             // stop everything about connection
-            if (isConnected) {
+            else {
                 isConnected = false;
                 try {
                     serverSocket.close();
@@ -397,6 +416,11 @@ class GUI_Teacher{
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
+            // do some check
+            if(!isQSet) {
+                warningGUI.init("Set a question first!");
+                return;
+            }
             frac_ans = new int[4];                                      // each time create a new array
             for (var elem : answers) {                                  // count the number of each choice
                     if (elem.charAt(0) == 'A') ++frac_ans[0];
@@ -404,17 +428,18 @@ class GUI_Teacher{
                     else if (elem.charAt(0) == 'C') ++frac_ans[2];
                     else if (elem.charAt(0) == 'D') ++frac_ans[3];
                 }
-            JFrame frame = new JFrame();                                // start a new frame. initialize
+            JFrame frame = new JFrame("Result of "+now_q.ID);      // start a new frame. initialize
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setSize(900,600);
             frame.setResizable(true);
             JPanel bgrd = new JPanel(new BorderLayout());
             JPanel labelP = new JPanel(new GridLayout(4,1));
             bgrd.add(labelP, BorderLayout.WEST);
-            labelP.add(new JLabel(frac_ans[0]+" chose A (red)"));
-            labelP.add(new JLabel(frac_ans[1]+" chose B (blue)"));
-            labelP.add(new JLabel(frac_ans[2]+" chose C (green)"));
-            labelP.add(new JLabel(frac_ans[3]+" chose D (yellow)"));
+            labelP.add(new JLabel(frac_ans[0]+" chose A (red)", SwingConstants.LEFT));
+            labelP.add(new JLabel(frac_ans[1]+" chose B (blue)",SwingConstants.LEFT));
+            labelP.add(new JLabel(frac_ans[2]+" chose C (green)",SwingConstants.LEFT));
+            labelP.add(new JLabel(frac_ans[3]+" chose D (yellow)",SwingConstants.LEFT));
+            // This is the pie panel
             PieChartPanel panel = new PieChartPanel(frac_ans);
             bgrd.add(panel);
             frame.add(bgrd);
@@ -486,18 +511,19 @@ class GUI_Teacher{
             dPane = new JScrollPane(choiceD);
             choiceD.setLineWrap(true);
             qID = new JTextField();
-            background.add(new JLabel("Question: "));
+            background.add(new JLabel("Write your question here: ", SwingConstants.CENTER));
             background.add(qPane);
-            background.add(new JLabel("Option A: "));
+            background.add(new JLabel("Write the Option A here: ", SwingConstants.CENTER));
             background.add(aPane);
-            background.add(new JLabel("Option B: "));
+            background.add(new JLabel("Write the Option B here: ",SwingConstants.CENTER));
             background.add(bPane);
-            background.add(new JLabel("Option C: "));
+            background.add(new JLabel("Write the Option C here: ",SwingConstants.CENTER));
             background.add(cPane);
-            background.add(new JLabel("Option D: "));
+            background.add(new JLabel("Write the Option D here: ",SwingConstants.CENTER));
             background.add(dPane);
-            background.add(new JLabel("Short Name: "));
+            background.add(new JLabel("Short name for this question: ",SwingConstants.CENTER));
             background.add(qID);
+            background.add(new JLabel("(Make sure that you have filled all fields!)", SwingConstants.CENTER));
             done = new JButton("DONE");
             background.add(done);
             ActionListener ac = new ActionListener() {
@@ -571,6 +597,7 @@ class GUI_Teacher{
         private JLabel uname;
         private JTextField usrField;
 
+        // initialize the gui
         public DBConnectGUI() {
             DBFrame = new JFrame("Database Connection");
             dbNameLabel = new JLabel();
@@ -656,23 +683,26 @@ class GUI_Teacher{
                     dbAddr = addrField.getText();
                     dbName = dField.getText();
                     dbUser = usrField.getText();
-                    dbPass = passField.getText();
+                    dbPass = String.valueOf(passField.getPassword());
                     try {
 
                         // must make sure that the fields are all filled
                         if(!dbName.isEmpty() && !dbUser.isEmpty() && !dbPass.isEmpty()&&!dbAddr.isEmpty() ) {
                             connection = (Connection) DriverManager.getConnection(dbAddr, dbUser, dbPass);
                             statement = connection.createStatement();
-                            isBSet = true;
+                            isDBSet = true;
                         }
                     } catch (SQLException e) {
-                        isBSet = false;     // if cannot connect, unset the flag
+                        isDBSet = false;     // if cannot connect, unset the flag
                     } finally {
+                        /* Since this window will be wake up when the program start, this choice was set to
+                        be "exit"; but after the connection is first-time tried, it will be set to "hide" */
+                        DBFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
                         frame.setVisible(true);
                         DBFrame.setVisible(false);
 
                         // connect failed notice
-                        if(!isBSet) warningGUI.init("<html>Unable to connect to the database<br/>" +
+                        if(!isDBSet) warningGUI.init("<html>Unable to connect to the database<br/>" +
                                 "The data will not be uploaded; but you can set it later.</html>");
                     }
                 }
@@ -680,9 +710,6 @@ class GUI_Teacher{
             connectB.addActionListener(ac);
             DBFrame.setVisible(true);
 
-            /* Since this window will be wake up when the program start, this choice was set to
-                be "exit"; but after the connection is first-time tried, it will be set to "hide" */
-            DBFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         }
 
         }
