@@ -17,17 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
-    This is the code for teacher's end. It has four guis: database setting gui, main gui, question setting gui, and a
-    warning gui. After the software is started, the database setting gui will appear. The teacher can choose to fill the
-    fields to set the database to where the result will be uploaded. If leaving it blank or failing to connect, then the
-    teacher will still be able to use the software, but the result will not be uploaded. Then, in the main gui, the teacher
-    will need to set the question first. In the question setting gui, the teacher should fill all fields: question, A, B,
-    C, D, and the question ID. After that, the teacher may start the server. The server will be started at [IP]:1919. Af
-    -ter students' end are connected, teacher's end will send the question via the output stream to student's end, and that
-    end will handle the sent information and show it in correct format. A scanner will be ready to hear from student's end.
-    The heard results will be recorded in a thread-safe list by each message listener thread. The teacher can check the
-    pie chart by connecting the "view result" button. Teachers may not edit the question or download the result in txt file
-    unless they stop the connection.
+ This is the code for teacher's end. It has four guis: database setting gui, main gui, question setting gui, and a warning gui. After the software is started, the database setting gui will appear. The teacher can choose to fill the fields to set the database to where the result will be uploaded. If leaving it blank or failing to connect, then the teacher will still be able to use the software, but the result will not be uploaded. Then, in the main gui, the teacher will need to set the question first. In the question setting gui, the teacher should fill all fields: question, A, B, C, D, and the question ID. After that, the teacher may start the server. The server will be started at [IP]:1919. After students' end are connected, teacher's end will send the question via the output stream to student's end, and that end will handle the sent information and show it in correct format. A scanner will be ready to hear from student's end. The heard results will be recorded in a thread-safe list by each message listener thread. The teacher can check the pie chart by connecting the "view result" button. Teachers may not edit the question or download the result in txt file unless they stop the connection.
 */
 
 
